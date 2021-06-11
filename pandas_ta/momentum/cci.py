@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pandas_ta import Imports
 from pandas_ta.overlap import hlc3, sma
 from pandas_ta.statistics.mad import mad
 from pandas_ta.utils import get_offset, verify_series
@@ -7,20 +8,26 @@ from pandas_ta.utils import get_offset, verify_series
 def cci(high, low, close, length=None, c=None, offset=None, **kwargs):
     """Indicator: Commodity Channel Index (CCI)"""
     # Validate Arguments
-    high = verify_series(high)
-    low = verify_series(low)
-    close = verify_series(close)
     length = int(length) if length and length > 0 else 14
     c = float(c) if c and c > 0 else 0.015
+    high = verify_series(high, length)
+    low = verify_series(low, length)
+    close = verify_series(close, length)
     offset = get_offset(offset)
 
-    # Calculate Result
-    typical_price = hlc3(high=high, low=low, close=close)
-    mean_typical_price = sma(typical_price, length=length)
-    mad_typical_price = mad(typical_price, length=length)
+    if high is None or low is None or close is None: return
 
-    cci = typical_price - mean_typical_price
-    cci /= c * mad_typical_price
+    # Calculate Result
+    if Imports["talib"]:
+        from talib import CCI
+        cci = CCI(high, low, close, length)
+    else:
+        typical_price = hlc3(high=high, low=low, close=close)
+        mean_typical_price = sma(typical_price, length=length)
+        mad_typical_price = mad(typical_price, length=length)
+
+        cci = typical_price - mean_typical_price
+        cci /= c * mad_typical_price
 
     # Offset
     if offset != 0:

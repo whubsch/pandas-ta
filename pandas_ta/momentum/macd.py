@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-from pandas import DataFrame, concat
+from pandas import concat, DataFrame
+from pandas_ta import Imports
 from pandas_ta.overlap import ema
 from pandas_ta.utils import get_offset, verify_series, signals
 
@@ -7,21 +8,27 @@ from pandas_ta.utils import get_offset, verify_series, signals
 def macd(close, fast=None, slow=None, signal=None, offset=None, **kwargs):
     """Indicator: Moving Average, Convergence/Divergence (MACD)"""
     # Validate arguments
-    close = verify_series(close)
     fast = int(fast) if fast and fast > 0 else 12
     slow = int(slow) if slow and slow > 0 else 26
     signal = int(signal) if signal and signal > 0 else 9
     if slow < fast:
         fast, slow = slow, fast
+    close = verify_series(close, max(fast, slow, signal))
     offset = get_offset(offset)
 
-    # Calculate Result
-    fastma = ema(close, length=fast)
-    slowma = ema(close, length=slow)
+    if close is None: return
 
-    macd = fastma - slowma
-    signalma = ema(close=macd.loc[macd.first_valid_index():,], length=signal)
-    histogram = macd - signalma
+    # Calculate Result
+    if Imports["talib"]:
+        from talib import MACD
+        macd, signalma, histogram = MACD(close, fast, slow)
+    else:
+        fastma = ema(close, length=fast)
+        slowma = ema(close, length=slow)
+
+        macd = fastma - slowma
+        signalma = ema(close=macd.loc[macd.first_valid_index():,], length=signal)
+        histogram = macd - signalma
 
     # Offset
     if offset != 0:

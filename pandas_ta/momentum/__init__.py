@@ -30,8 +30,10 @@ from .rvgi import rvgi
 from .slope import slope
 from .smi import smi
 from .squeeze import squeeze
+from .stc import stc
 from .stoch import stoch
 from .stochrsi import stochrsi
+from .td_seq import td_seq
 from .trix import trix
 from .tsi import tsi
 from .uo import uo

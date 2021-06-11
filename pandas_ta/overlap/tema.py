@@ -1,24 +1,37 @@
 # -*- coding: utf-8 -*-
 from .ema import ema
+from pandas_ta import Imports
 from pandas_ta.utils import get_offset, verify_series
 
 
 def tema(close, length=None, offset=None, **kwargs):
     """Indicator: Triple Exponential Moving Average (TEMA)"""
     # Validate Arguments
-    close = verify_series(close)
     length = int(length) if length and length > 0 else 10
+    close = verify_series(close, length)
     offset = get_offset(offset)
 
+    if close is None: return
+
     # Calculate Result
-    ema1 = ema(close=close, length=length, **kwargs)
-    ema2 = ema(close=ema1, length=length, **kwargs)
-    ema3 = ema(close=ema2, length=length, **kwargs)
-    tema = 3 * (ema1 - ema2) + ema3
+    if Imports["talib"]:
+        from talib import TEMA
+        tema = TEMA(close, length)
+    else:
+        ema1 = ema(close=close, length=length, **kwargs)
+        ema2 = ema(close=ema1, length=length, **kwargs)
+        ema3 = ema(close=ema2, length=length, **kwargs)
+        tema = 3 * (ema1 - ema2) + ema3
 
     # Offset
     if offset != 0:
         tema = tema.shift(offset)
+
+    # Handle fills
+    if "fillna" in kwargs:
+        tema.fillna(kwargs["fillna"], inplace=True)
+    if "fill_method" in kwargs:
+        tema.fillna(method=kwargs["fill_method"], inplace=True)
 
     # Name & Category
     tema.name = f"TEMA_{length}"

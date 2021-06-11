@@ -1,23 +1,36 @@
 # -*- coding: utf-8 -*-
 from numpy import sqrt as npsqrt
 from .variance import variance
+from pandas_ta import Imports
 from pandas_ta.utils import get_offset, verify_series
 
 
-def stdev(close, length=None, ddof=1, offset=None, **kwargs):
+def stdev(close, length=None, ddof=None, offset=None, **kwargs):
     """Indicator: Standard Deviation"""
     # Validate Arguments
-    close = verify_series(close)
     length = int(length) if length and length > 0 else 30
-    ddof = int(ddof) if ddof >= 0 and ddof < length else 1
+    ddof = int(ddof) if ddof and ddof >= 0 and ddof < length else 1
+    close = verify_series(close, length)
     offset = get_offset(offset)
 
+    if close is None: return
+
     # Calculate Result
-    stdev = variance(close=close, length=length, ddof=ddof).apply(npsqrt)
+    if Imports["talib"]:
+        from talib import STDDEV
+        stdev = STDDEV(close, length)
+    else:
+        stdev = variance(close=close, length=length, ddof=ddof).apply(npsqrt)
 
     # Offset
     if offset != 0:
         stdev = stdev.shift(offset)
+
+    # Handle fills
+    if "fillna" in kwargs:
+        stdev.fillna(kwargs["fillna"], inplace=True)
+    if "fill_method" in kwargs:
+        stdev.fillna(method=kwargs["fill_method"], inplace=True)
 
     # Name & Category
     stdev.name = f"STDEV_{length}"

@@ -18,7 +18,7 @@ setup(
         "pandas_ta.volatility",
         "pandas_ta.volume"
     ],
-    version=".".join(("0", "2", "49b")),
+    version=".".join(("0", "2", "86b")),
     description=long_description,
     long_description=long_description,
     author="Kevin Johnson",
@@ -26,7 +26,6 @@ setup(
     url="https://github.com/twopirllc/pandas-ta",
     maintainer="Kevin Johnson",
     maintainer_email="appliedmathkj@gmail.com",
-    # install_requires=["pandas"],
     download_url="https://github.com/twopirllc/pandas-ta.git",
     keywords=["technical analysis", "trading", "python3", "pandas"],
     license="The MIT License (MIT)",
@@ -35,6 +34,7 @@ setup(
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Operating System :: OS Independent",
         "License :: OSI Approved :: MIT License",
         "Natural Language :: English",
@@ -54,7 +54,11 @@ setup(
     # You can install these using the following syntax, for example:
     # $ pip install -e .[dev,test]
     extras_require={
-        "dev": ["ta-lib", "jupyterlab", "sklearn", "statsmodels"],
+        "dev": [
+            "alphaVantage-api", "matplotlib", "mplfinance", "scipy",
+            "sklearn", "statsmodels", "stochastic",
+            "talib", "tqdm", "vectorbt", "yfinance",
+        ],
         "test": ["ta-lib"],
     },
 )

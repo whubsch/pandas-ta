@@ -52,7 +52,7 @@ class TestTrend(TestCase):
     def test_amat(self):
         result = pandas_ta.amat(self.close)
         self.assertIsInstance(result, DataFrame)
-        self.assertEqual(result.name, "AMAT_EMA_8_21_2")
+        self.assertEqual(result.name, "AMATe_8_21_2")
 
     def test_aroon(self):
         result = pandas_ta.aroon(self.high, self.low)
@@ -90,12 +90,21 @@ class TestTrend(TestCase):
                 error_analysis(result.iloc[:, 0], CORRELATION, ex)
 
     def test_chop(self):
-        result = pandas_ta.chop(self.high, self.low, self.close)
+        result = pandas_ta.chop(self.high, self.low, self.close, ln=False)
         self.assertIsInstance(result, Series)
         self.assertEqual(result.name, "CHOP_14_1_100")
 
+        result = pandas_ta.chop(self.high, self.low, self.close, ln=True)
+        self.assertIsInstance(result, Series)
+        self.assertEqual(result.name, "CHOPln_14_1_100")
+
     def test_cksp(self):
-        result = pandas_ta.cksp(self.high, self.low, self.close)
+        result = pandas_ta.cksp(self.high, self.low, self.close, tvmode=False)
+        self.assertIsInstance(result, DataFrame)
+        self.assertEqual(result.name, "CKSP_10_3_20")
+
+    def test_cksp_tv(self):
+        result = pandas_ta.cksp(self.high, self.low, self.close, tvmode=True)
         self.assertIsInstance(result, DataFrame)
         self.assertEqual(result.name, "CKSP_10_1_9")
 
@@ -170,6 +179,11 @@ class TestTrend(TestCase):
         result = pandas_ta.ttm_trend(self.high, self.low, self.close)
         self.assertIsInstance(result, DataFrame)
         self.assertEqual(result.name, "TTMTREND_6")
+
+    def test_vhf(self):
+        result = pandas_ta.vhf(self.close)
+        self.assertIsInstance(result, Series)
+        self.assertEqual(result.name, "VHF_28")
 
     def test_vortex(self):
         result = pandas_ta.vortex(self.high, self.low, self.close)

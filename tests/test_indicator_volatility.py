@@ -60,13 +60,17 @@ class TestVolatility(TestCase):
                 error_analysis(result, CORRELATION, ex)
 
     def test_bbands(self):
-        result = pandas_ta.bbands(self.close)
+        result = pandas_ta.bbands(self.close, ddof=0)
+        self.assertIsInstance(result, DataFrame)
+        self.assertEqual(result.name, "BBANDS_5_2.0")
+
+        result = pandas_ta.bbands(self.close, ddof=1)
         self.assertIsInstance(result, DataFrame)
         self.assertEqual(result.name, "BBANDS_5_2.0")
 
         try:
             expected = tal.BBANDS(self.close)
-            expecteddf = DataFrame({"BBL_5_2.0": expected[0], "BBM_5_2.0": expected[1], "BBU_5_2.0": expected[2]})
+            expecteddf = DataFrame({"BBU_5_2.0": expected[0], "BBM_5_2.0": expected[1], "BBL_5_2.0": expected[2]})
             pdt.assert_frame_equal(result, expecteddf)
         except AssertionError as ae:
             try:

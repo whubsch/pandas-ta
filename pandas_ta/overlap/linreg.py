@@ -1,4 +1,13 @@
 # -*- coding: utf-8 -*-
+<<<<<<< HEAD
+=======
+from numpy import array as npArray
+from numpy import arctan as npAtan
+from numpy import NaN as npNaN
+from numpy import pi as npPi
+from numpy.lib.stride_tricks import sliding_window_view
+from pandas import Series
+>>>>>>> b2f2cc83a16376c1eb0a11aebed52186d7eab121
 from pandas_ta.utils import get_offset, verify_series
 import numpy as np
 import pandas as pd
@@ -7,8 +16,8 @@ import pandas as pd
 def linreg(close, length=None, offset=None, **kwargs):
     """Indicator: Linear Regression"""
     # Validate arguments
-    close = verify_series(close)
     length = int(length) if length and length > 0 else 14
+    close = verify_series(close, length)
     offset = get_offset(offset)
     angle = kwargs.pop("angle", False)
     intercept = kwargs.pop("intercept", False)
@@ -16,6 +25,8 @@ def linreg(close, length=None, offset=None, **kwargs):
     r = kwargs.pop("r", False)
     slope = kwargs.pop("slope", False)
     tsf = kwargs.pop("tsf", False)
+
+    if close is None: return
 
     # Calculate Result
     x = range(1, length + 1)  # [1, 2, ..., n] from 1 to n keeps Sum(xy) low
@@ -35,9 +46,15 @@ def linreg(close, length=None, offset=None, **kwargs):
             return b
 
         if angle:
+<<<<<<< HEAD
             theta = np.arctan(m)
             if degrees:
                 theta *= 180 / np.pi
+=======
+            theta = npAtan(m)
+            if degrees:
+                theta *= 180 / npPi
+>>>>>>> b2f2cc83a16376c1eb0a11aebed52186d7eab121
             return theta
 
         if r:
@@ -48,12 +65,17 @@ def linreg(close, length=None, offset=None, **kwargs):
 
         return m * length + b if tsf else m * (length - 1) + b
 
+<<<<<<< HEAD
     values = [
         linear_regression(each)
         for each in np.lib.stride_tricks.sliding_window_view(np.array(close), length)
     ]
     linreg = pd.Series([np.NaN] * (length - 1) + values)
     linreg.index = close.index
+=======
+    linreg_ = [linear_regression(_) for _ in sliding_window_view(npArray(close), length)]
+    linreg = Series([npNaN] * (length - 1) + linreg_, index=close.index)
+>>>>>>> b2f2cc83a16376c1eb0a11aebed52186d7eab121
 
     # Offset
     if offset != 0:
@@ -71,6 +93,7 @@ def linreg(close, length=None, offset=None, **kwargs):
     if intercept: linreg.name += "b"
     if angle: linreg.name += "a"
     if r: linreg.name += "r"
+
     linreg.name += f"_{length}"
     linreg.category = "overlap"
 

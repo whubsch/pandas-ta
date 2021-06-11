@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from .true_range import true_range
+from pandas_ta import Imports
 from pandas_ta.overlap import ma
 from pandas_ta.utils import get_drift, get_offset, verify_series
 
@@ -7,17 +8,23 @@ from pandas_ta.utils import get_drift, get_offset, verify_series
 def atr(high, low, close, length=None, mamode=None, drift=None, offset=None, **kwargs):
     """Indicator: Average True Range (ATR)"""
     # Validate arguments
-    high = verify_series(high)
-    low = verify_series(low)
-    close = verify_series(close)
     length = int(length) if length and length > 0 else 14
     mamode = mamode.lower() if mamode and isinstance(mamode, str) else "rma"
+    high = verify_series(high, length)
+    low = verify_series(low, length)
+    close = verify_series(close, length)
     drift = get_drift(drift)
     offset = get_offset(offset)
 
+    if high is None or low is None or close is None: return
+
     # Calculate Result
-    tr = true_range(high=high, low=low, close=close, drift=drift)
-    atr = ma(mamode, tr, length=length)
+    if Imports["talib"]:
+        from talib import ATR
+        atr = ATR(high, low, close)
+    else:
+        tr = true_range(high=high, low=low, close=close, drift=drift)
+        atr = ma(mamode, tr, length=length)
 
     percentage = kwargs.pop("percent", False)
     if percentage:

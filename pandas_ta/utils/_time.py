@@ -3,9 +3,10 @@ from datetime import datetime
 from time import localtime, perf_counter
 from typing import Tuple
 
-from pandas import DataFrame, Series, Timestamp
+from pandas import DataFrame, Timestamp
 
 from pandas_ta import EXCHANGE_TZ, RATE
+from pandas_ta.utils import verify_series
 
 
 def df_dates(df: DataFrame, dates: Tuple[str, list] = None) -> DataFrame:
@@ -60,21 +61,22 @@ def get_time(exchange: str = "NYSE", full:bool = True, to_string:bool = False) -
     if full:
         lt = localtime()
         local_ = f"Local: {lt.tm_hour}:{lt.tm_min:02d}:{lt.tm_sec:02d} {lt.tm_zone}"
-        doy = f"Day {today.dayofyear}/365 ({100 * round(today.dayofyear/365, 2)}%)"
+        doy = f"Day {today.dayofyear}/365 ({100 * round(today.dayofyear/365, 2):.2f}%)"
         exchange_ = f"{exchange}: {exchange_time}"
 
         s = f"{date}, {exchange_}, {local_}, {doy}"
     else:
-        s = f"{exchange}: {exchange_time}"
+        s = f"{date}, {exchange}: {exchange_time}"
 
     return s if to_string else print(s)
 
 
-def total_time(series: Series, tf: str = "years") -> float:
-    """Calculates the total time of a Series. Options: 'months', 'weeks',
-    'days', 'hours', 'minutes' and 'seconds'. Default: 'years'.
+def total_time(df: DataFrame, tf: str = "years") -> float:
+    """Calculates the total time of a DataFrame. Difference of the Last and
+    First index. Options: 'months', 'weeks', 'days', 'hours', 'minutes'
+    and 'seconds'. Default: 'years'.
     Useful for annualization."""
-    time_diff = series.index[-1] - series.index[0]
+    time_diff = df.index[-1] - df.index[0]
     TimeFrame = {
         "years": time_diff.days / RATE["TRADING_DAYS_PER_YEAR"],
         "months": time_diff.days / 30.417,

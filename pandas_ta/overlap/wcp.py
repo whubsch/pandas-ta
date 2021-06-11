@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from pandas_ta import Imports
 from pandas_ta.utils import get_offset, verify_series
 
 
@@ -11,11 +12,21 @@ def wcp(high, low, close, offset=None, **kwargs):
     offset = get_offset(offset)
 
     # Calculate Result
-    wcp = (high + low + 2 * close) / 4
+    if Imports["talib"]:
+        from talib import WCLPRICE
+        wcp = WCLPRICE(high, low, close)
+    else:
+        wcp = (high + low + 2 * close) / 4
 
     # Offset
     if offset != 0:
         wcp = wcp.shift(offset)
+
+    # Handle fills
+    if "fillna" in kwargs:
+        wcp.fillna(kwargs["fillna"], inplace=True)
+    if "fill_method" in kwargs:
+        wcp.fillna(method=kwargs["fill_method"], inplace=True)
 
     # Name & Category
     wcp.name = "WCP"
