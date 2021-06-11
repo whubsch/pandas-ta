@@ -2,41 +2,39 @@
 from pandas import Series
 from pandas_ta import Imports
 from pandas_ta.utils import get_offset, verify_series
+import numpy as np
 
 
 def wma(close, length=None, asc=None, offset=None, **kwargs):
     """Indicator: Weighted Moving Average (WMA)"""
     # Validate Arguments
+    close = verify_series(close)
     length = int(length) if length and length > 0 else 10
     asc = asc if asc else True
-    close = verify_series(close, length)
     offset = get_offset(offset)
-
-    if close is None: return
 
     # Calculate Result
     if Imports["talib"]:
         from talib import WMA
         wma = WMA(close, length)
     else:
-        from numpy import arange as npArange
-        from numpy import dot as npDot
-
         total_weight = 0.5 * length * (length + 1)
-        weights_ = Series(npArange(1, length + 1))
-        weights = weights_ if asc else weights_[::-1]
+        weights_ = np.arange(1, length + 1)
+        weights = weights_ if asc else np.flip(weights_)
 
-        def linear(w):
-            def _compute(x):
-                return npDot(x, w) / total_weight
-            return _compute
+        def _linear(x):
+            return np.dot(x, weights) / total_weight
 
-        close_ = close.rolling(length, min_periods=length)
-        wma = close_.apply(linear(weights), raw=True)
+        values = [
+            _linear(each)
+            for each in np.lib.stride_tricks.sliding_window_view(np.array(close), length)
+        ]
+        wma_ds = Series([np.NaN] * (length - 1) + values)
+        wma_ds.index = close.index
 
     # Offset
     if offset != 0:
-        wma = wma.shift(offset)
+        wma_ds = wma_ds.shift(offset)
 
     # Handle fills
     if "fillna" in kwargs:
@@ -45,10 +43,10 @@ def wma(close, length=None, asc=None, offset=None, **kwargs):
         wma.fillna(method=kwargs["fill_method"], inplace=True)
 
     # Name & Category
-    wma.name = f"WMA_{length}"
-    wma.category = "overlap"
+    wma_ds.name = f"WMA_{length}"
+    wma_ds.category = "overlap"
 
-    return wma
+    return wma_ds
 
 
 wma.__doc__ = \
