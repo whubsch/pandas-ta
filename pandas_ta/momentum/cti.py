@@ -1,7 +1,12 @@
+<<<<<<< HEAD
+import pandas as pd
+=======
 # -*- coding: utf-8 -*-
 from pandas import Series
 from pandas_ta.overlap import linreg
+>>>>>>> b2f2cc83a16376c1eb0a11aebed52186d7eab121
 from pandas_ta.utils import get_offset, verify_series
+from pandas_ta.overlap import linreg
 
 
 def cti(close, length=None, offset=None, **kwargs) -> Series:
@@ -10,9 +15,13 @@ def cti(close, length=None, offset=None, **kwargs) -> Series:
     close = verify_series(close, length)
     offset = get_offset(offset)
 
+<<<<<<< HEAD
+    cti_ds = linreg(close, length, r=True)
+=======
     if close is None: return
 
     cti = linreg(close, length=length, r=True)
+>>>>>>> b2f2cc83a16376c1eb0a11aebed52186d7eab121
 
     # Offset
     if offset != 0:

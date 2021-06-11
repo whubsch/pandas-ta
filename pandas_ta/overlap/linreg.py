@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
+<<<<<<< HEAD
+=======
 from numpy import array as npArray
 from numpy import arctan as npAtan
 from numpy import NaN as npNaN
 from numpy import pi as npPi
 from numpy.lib.stride_tricks import sliding_window_view
 from pandas import Series
+>>>>>>> b2f2cc83a16376c1eb0a11aebed52186d7eab121
 from pandas_ta.utils import get_offset, verify_series
+import numpy as np
+import pandas as pd
 
 
 def linreg(close, length=None, offset=None, **kwargs):
@@ -30,8 +35,8 @@ def linreg(close, length=None, offset=None, **kwargs):
     divisor = length * x2_sum - x_sum * x_sum
 
     def linear_regression(series):
-        y_sum = series.sum()
-        xy_sum = (x * series).sum()
+        y_sum = sum(series)
+        xy_sum = sum(x * series)
 
         m = (length * xy_sum - x_sum * y_sum) / divisor
         if slope:
@@ -41,21 +46,36 @@ def linreg(close, length=None, offset=None, **kwargs):
             return b
 
         if angle:
+<<<<<<< HEAD
+            theta = np.arctan(m)
+            if degrees:
+                theta *= 180 / np.pi
+=======
             theta = npAtan(m)
             if degrees:
                 theta *= 180 / npPi
+>>>>>>> b2f2cc83a16376c1eb0a11aebed52186d7eab121
             return theta
 
         if r:
-            y2_sum = (series * series).sum()
+            y2_sum = sum(series ** 2)
             rn = length * xy_sum - x_sum * y_sum
             rd = (divisor * (length * y2_sum - y_sum * y_sum)) ** 0.5
             return rn / rd
 
         return m * length + b if tsf else m * (length - 1) + b
 
+<<<<<<< HEAD
+    values = [
+        linear_regression(each)
+        for each in np.lib.stride_tricks.sliding_window_view(np.array(close), length)
+    ]
+    linreg = pd.Series([np.NaN] * (length - 1) + values)
+    linreg.index = close.index
+=======
     linreg_ = [linear_regression(_) for _ in sliding_window_view(npArray(close), length)]
     linreg = Series([npNaN] * (length - 1) + linreg_, index=close.index)
+>>>>>>> b2f2cc83a16376c1eb0a11aebed52186d7eab121
 
     # Offset
     if offset != 0:
